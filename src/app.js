@@ -1,5 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const passport = require('passport');
+require('./passport/google');
 const authRoutes = require("./routes/auth.routes");
 const foodRoutes = require("./routes/food.routes"); 
 const foodPartnerRoutes = require("./routes/food-partner.routes");
@@ -17,6 +19,7 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(express.json());
+app.use(passport.initialize());
 
 
 app.get("/", (req, res) => {
