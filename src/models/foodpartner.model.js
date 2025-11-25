@@ -34,10 +34,6 @@ const foodPartnerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  googleAuth: {
-    type: Boolean,
-    default: false
-  },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
 });

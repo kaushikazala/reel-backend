@@ -24,10 +24,7 @@
     "multer": "^2.0.2",
     "nodemailer": "^6.10.1",
     "nodemon": "^3.1.10",
-    "passport": "^0.6.0",
-    "passport-google-oauth20": "^2.0.0",
     "uuid": "^13.0.0"
   },
-  "dependencies-dev-added": true,
-  "_note": "Packages passport, passport-google-oauth20, and nodemailer have been added. Run 'npm install' to ensure they are installed."
+  "dependencies-dev-added": true
 }
