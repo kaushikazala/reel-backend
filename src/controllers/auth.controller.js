@@ -227,69 +227,7 @@ async function getMe(req, res) {
         return res.status(401).json({ message: 'Invalid token' });
     }
 }
-
-async function verifyGoogleToken(req, res) {
-    try {
-        const { idToken, role = 'user' } = req.body;
-        if (!idToken) return res.status(400).json({ message: 'No idToken provided' });
-
-        // Verify Google token using Google's client library (optional but secure)
-        // For now, we decode it (in production, verify signature with Google)
-        const decoded = jwt.decode(idToken);
-        if (!decoded) return res.status(400).json({ message: 'Invalid token' });
-
-        const email = decoded.email;
-        const fullName = decoded.name || '';
-        const Model = role === 'food-partner' ? foodPartnerModel : userModel;
-
-        let account = await Model.findOne({ email });
-        if (!account) {
-            if (role === 'food-partner') {
-                account = await foodPartnerModel.create({
-                    businessName: `${fullName}'s Business`,
-                    ownerName: fullName,
-                    email,
-                    phone: '',
-                    businessType: '',
-                    address: '',
-                    password: '',
-                    agreeToTerms: false,
-                    googleAuth: true
-                });
-            } else {
-                account = await userModel.create({
-                    fullName,
-                    email,
-                    password: '',
-                    googleAuth: true
-                });
-            }
-        }
-
-        const token = jwt.sign({ id: account._id, role }, process.env.JWT_SECRET);
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            path: '/'
-        };
-        res.cookie('token', token, cookieOptions);
-
-        return res.json({
-            message: 'Google login successful',
-            role,
-            profile: {
-                _id: account._id,
-                email: account.email,
-                fullName: account.fullName || account.ownerName
-            }
-        });
-    } catch (err) {
-        console.error('Google token verification error:', err);
-        return res.status(401).json({ message: 'Failed to verify Google token' });
-    }
-}
-
+ 
 module.exports = {
     registerUser,
     loginUser,
@@ -299,8 +237,7 @@ module.exports = {
     logoutFoodPartner,
     forgotPassword,
     resetPassword,
-    getMe,
-    verifyGoogleToken
+    getMe
 };
 
 

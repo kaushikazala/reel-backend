@@ -1,6 +1,5 @@
 const express = require("express");
 const authController = require("../controllers/auth.controller");
-const passport = require('passport');
 
 const router = express.Router();
 
@@ -15,8 +14,7 @@ router.post("/food-partner/login",authController.loginFoodPartner);
 router.get("/food-partner/logout",authController.logoutFoodPartner);
 
 // Google OAuth (client-side token verification)
-// POST /api/auth/google/token with { idToken, role }
-router.post('/google/token', authController.verifyGoogleToken);
+// Google OAuth removed
 
 // forgot/reset
 router.post('/forgot-password', authController.forgotPassword);

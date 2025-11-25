@@ -1,7 +1,5 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const passport = require('passport');
-require('./passport/google');
 const authRoutes = require("./routes/auth.routes");
 const foodRoutes = require("./routes/food.routes"); 
 const foodPartnerRoutes = require("./routes/food-partner.routes");
@@ -9,31 +7,49 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'https://zomato-reel-delta.vercel.app',
-        'https://reel-zom-project.vercel.app',
-        /\.vercel\.app$/  // Allow all Vercel deployments
-    ]
-    
-}));
+// Allowed origins for CORS (add other deployment domains here)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://zomato-reel-delta.vercel.app',
+  'https://reel-zom-project.vercel.app'
+];
 
+// Middleware to echo allowed origin and explicitly set credentials header.
+// This ensures the browser receives Access-Control-Allow-Credentials: true
+// so cookies are included on cross-site requests.
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin) return next();
+
+  const isAllowed = allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin);
+  if (isAllowed) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  }
+
+  if (req.method === 'OPTIONS') {
+    // Short-circuit preflight
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
+// Use cors middleware as well (keeps compatibility and sets additional headers)
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like curl or postman)
+  origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || /\.vercel\.app$/.test(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error('Not allowed by CORS'));
+    if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true,
+  credentials: true
 }));
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(passport.initialize());
 
 
 app.get("/", (req, res) => {
