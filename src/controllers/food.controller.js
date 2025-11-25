@@ -25,22 +25,35 @@ async function createFoodItem(req, res) {
 
 async function getFoodItems(req, res) {
   try {
-    const user = req.user;
+    const user = req.user; // may be undefined for anonymous requests
 
     const foodItems = await foodModel.find({});
-    
-    // Get user's likes and saves for all food items
-    const userLikes = await likeModel.find({ user: user._id }).select('food');
-    const userSaves = await saveModel.find({ user: user._id }).select('food');
-    
-    const likedFoodIds = new Set(userLikes.map(like => like.food.toString()));
-    const savedFoodIds = new Set(userSaves.map(save => save.food.toString()));
-    
-    // Add isLiked and isSaved flags to each food item
-    const enrichedFoodItems = foodItems.map(food => ({
+
+    if (!user) {
+      // Anonymous user: return items without personalization
+      const enrichedFoodItems = foodItems.map((food) => ({
+        ...food.toObject(),
+        isLiked: false,
+        isSaved: false,
+      }));
+
+      return res.status(200).json({
+        message: "Food items fetched successfully",
+        foodItems: enrichedFoodItems,
+      });
+    }
+
+    // Authenticated user: include like/save flags
+    const userLikes = await likeModel.find({ user: user._id }).select("food");
+    const userSaves = await saveModel.find({ user: user._id }).select("food");
+
+    const likedFoodIds = new Set(userLikes.map((like) => like.food.toString()));
+    const savedFoodIds = new Set(userSaves.map((save) => save.food.toString()));
+
+    const enrichedFoodItems = foodItems.map((food) => ({
       ...food.toObject(),
       isLiked: likedFoodIds.has(food._id.toString()),
-      isSaved: savedFoodIds.has(food._id.toString())
+      isSaved: savedFoodIds.has(food._id.toString()),
     }));
 
     res.status(200).json({
@@ -58,13 +71,14 @@ async function getFoodItems(req, res) {
 
 async function likeFood(req, res) {
   try {
-    const { foodId } = req.body;
+    // accept foodId either from URL param (:id) or from request body
+    const foodId = req.params?.id || req.body?.foodId;
     const user = req.user;
+    if (!foodId) {
+      return res.status(400).json({ message: 'Missing foodId' });
+    }
 
-    const isAlreadyLiked = await likeModel.findOne({
-      user: user._id,
-      food: foodId,
-    });
+    const isAlreadyLiked = await likeModel.findOne({ user: user._id, food: foodId });
     if (isAlreadyLiked) {
       await likeModel.deleteOne({ user: user._id, food: foodId });
       const updatedFood = await foodModel.findByIdAndUpdate(foodId, { $inc: { likesCount: -1 } }, { new: true });
@@ -97,13 +111,14 @@ async function likeFood(req, res) {
 
 async function saveFood(req, res) {
   try {
-    const { foodId } = req.body;
+    // accept foodId either from URL param (:id) or from request body
+    const foodId = req.params?.id || req.body?.foodId;
     const user = req.user;
-    
-    const isAlreadySaved = await saveModel.findOne({
-        user: user._id,
-        food: foodId,
-    });
+    if (!foodId) {
+      return res.status(400).json({ message: 'Missing foodId' });
+    }
+
+    const isAlreadySaved = await saveModel.findOne({ user: user._id, food: foodId });
 
     if (isAlreadySaved) { 
         await saveModel.deleteOne({ user: user._id, food: foodId });

@@ -17,9 +17,9 @@ router.post(
   foodController.createFoodItem
 );
  
-//GET /api/food/  for users 
-router.get("/",
-  authMiddleware.authUserMiddleware,
+//GET /api/food/  public feed (optional auth handled in controller)
+router.get(
+  "/",
   foodController.getFoodItems
 );
 
@@ -29,6 +29,17 @@ router.post("/like",
 );
 
 router.post("/save",
+  authMiddleware.authUserMiddleware,
+  foodController.saveFood
+);
+
+// Support RESTful endpoints used by frontend: POST /api/food/:id/like and /api/food/:id/bookmark
+router.post('/:id/like',
+  authMiddleware.authUserMiddleware,
+  foodController.likeFood
+);
+
+router.post('/:id/bookmark',
   authMiddleware.authUserMiddleware,
   foodController.saveFood
 );
