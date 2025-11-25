@@ -161,24 +161,35 @@ async function forgotPassword(req, res) {
     const { email, role = 'user' } = req.body;
     const Model = role === 'food-partner' ? foodPartnerModel : userModel;
 
-    const account = await Model.findOne({ email });
-    if (!account) return res.status(404).json({ message: 'Account not found' });
+    try {
+        const account = await Model.findOne({ email });
+        if (!account) return res.status(404).json({ message: 'Account not found' });
 
-    const token = crypto.randomBytes(32).toString('hex');
-    account.resetPasswordToken = token;
-    account.resetPasswordExpires = Date.now() + 1000 * 60 * 60; // 1 hour
-    await account.save();
+        const token = crypto.randomBytes(32).toString('hex');
+        account.resetPasswordToken = token;
+        account.resetPasswordExpires = Date.now() + 1000 * 60 * 60; // 1 hour
+        await account.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}&role=${role}`;
+        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}&role=${role}`;
 
-    await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Reset your password',
-        html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 1 hour.</p>`
-    });
+        // Validate email config
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.error('Email credentials not configured');
+            return res.status(500).json({ message: 'Email service not configured' });
+        }
 
-    return res.json({ message: 'Password reset email sent' });
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Reset your password',
+            html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 1 hour.</p>`
+        });
+
+        return res.json({ message: 'Password reset email sent' });
+    } catch (err) {
+        console.error('Forgot password error:', err);
+        return res.status(500).json({ message: 'Error sending reset email', error: err.message });
+    }
 }
 
 async function resetPassword(req, res) {

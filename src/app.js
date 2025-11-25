@@ -12,9 +12,14 @@ const app = express();
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'https://zomato-reel-delta.vercel.app'
+        'http://localhost:3000',
+        'https://zomato-reel-delta.vercel.app',
+        'https://reel-zom-project.vercel.app',
+        /\.vercel\.app$/  // Allow all Vercel deployments
     ],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(cookieParser());
