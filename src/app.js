@@ -12,14 +12,23 @@ const app = express();
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'http://localhost:3000',
         'https://zomato-reel-delta.vercel.app',
         'https://reel-zom-project.vercel.app',
         /\.vercel\.app$/  // Allow all Vercel deployments
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    ]
+    
+}));
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like curl or postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || /\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
 }));
 
 app.use(cookieParser());
