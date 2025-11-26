@@ -214,7 +214,10 @@ async function resetPassword(req, res) {
 
 async function getMe(req, res) {
     const token = req.cookies.token;
-    if (!token) return res.status(401).json({ message: 'No token' });
+    if (!token) {
+        // Treat missing token as anonymous user — return 200 with null profile
+        return res.status(200).json({ role: null, profile: null });
+    }
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         if (payload.role === 'food-partner') {
@@ -224,7 +227,9 @@ async function getMe(req, res) {
         const user = await userModel.findById(payload.id).select('-password -resetPasswordToken -resetPasswordExpires');
         return res.json({ role: 'user', profile: user });
     } catch (err) {
-        return res.status(401).json({ message: 'Invalid token' });
+        // Invalid token: clear cookie and return anonymous response
+        try { res.clearCookie('token', { ...cookieOptions, maxAge: 0 }); } catch(e) {}
+        return res.status(200).json({ role: null, profile: null });
     }
 }
  
