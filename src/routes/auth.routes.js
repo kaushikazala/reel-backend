@@ -20,7 +20,6 @@ router.get("/food-partner/logout",authController.logoutFoodPartner);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 
-// get current user/profile from cookie
-router.get('/me', authController.getMe);
+
 
 module.exports = router;

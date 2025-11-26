@@ -212,26 +212,7 @@ async function resetPassword(req, res) {
     return res.json({ message: 'Password reset successful' });
 }
 
-async function getMe(req, res) {
-    try {
-        const token = req.cookies.token;
-        if (!token) {
-            return res.status(401).json({ message: 'No token' });
-        }
 
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
-        
-        if (payload.role === 'food-partner') {
-            const fp = await foodPartnerModel.findById(payload.id).select('-password -resetPasswordToken -resetPasswordExpires');
-            return res.json({ role: 'food-partner', profile: fp });
-        }
-        
-        const user = await userModel.findById(payload.id).select('-password -resetPasswordToken -resetPasswordExpires');
-        return res.json({ role: 'user', profile: user });
-    } catch (err) {
-        return res.status(401).json({ message: 'Invalid token' });
-    }
-}
  
 module.exports = {
     registerUser,
@@ -242,7 +223,7 @@ module.exports = {
     logoutFoodPartner,
     forgotPassword,
     resetPassword,
-    getMe
+
 };
 
 
