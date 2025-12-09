@@ -9,6 +9,7 @@ async function createFoodItem(req, res) {
   const fileUploadResult = await storageService.uploadFile(
     req.file.buffer,
     uuid() + ".mp4" 
+    // uuid() + ".mp4" + originalExt
   ); //video data
 
   const foodItem = await foodModel.create({
