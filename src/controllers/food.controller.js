@@ -5,9 +5,10 @@ const likeModel = require("../models/likes.model");
 const saveModel = require("../models/save.model");
 
 async function createFoodItem(req, res) {
+  const originalExt = req.file.originalname.split(".").pop();
   const fileUploadResult = await storageService.uploadFile(
     req.file.buffer,
-    uuid()
+    uuid() + ".mp4" + originalExt
   ); //video data
 
   const foodItem = await foodModel.create({
