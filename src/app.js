@@ -15,30 +15,6 @@ const allowedOrigins = [
   'https://reel-zom-project.vercel.app'
 ];
 
-// Middleware to echo allowed origin and explicitly set credentials header.
-// This ensures the browser receives Access-Control-Allow-Credentials: true
-// so cookies are included on cross-site requests.
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin) return next();
-
-  const isAllowed = allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin);
-  if (isAllowed) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  }
-
-  if (req.method === 'OPTIONS') {
-    // Short-circuit preflight
-    return res.sendStatus(204);
-  }
-
-  next();
-});
-
-// Use cors middleware as well (keeps compatibility and sets additional headers)
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);

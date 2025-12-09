@@ -23,15 +23,15 @@ router.get(
   foodController.getFoodItems
 );
 
-router.post("/like",
-  authMiddleware.authUserMiddleware,
-  foodController.likeFood
-);
+// router.post("/like",
+//   authMiddleware.authUserMiddleware,
+//   foodController.likeFood
+// );
 
-router.post("/save",
-  authMiddleware.authUserMiddleware,
-  foodController.saveFood
-);
+// router.post("/save",
+//   authMiddleware.authUserMiddleware,
+//   foodController.saveFood
+// );
 
 // Support RESTful endpoints used by frontend: POST /api/food/:id/like and /api/food/:id/bookmark
 router.post('/:id/like',

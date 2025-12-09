@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
 // Common cookie options for all
 const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure:true,
         sameSite: "none",
         path: "/",
 };
