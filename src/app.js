@@ -1,35 +1,48 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const authRoutes = require("./routes/auth.routes");
-const foodRoutes = require("./routes/food.routes"); 
-const foodPartnerRoutes = require("./routes/food-partner.routes");
 const cors = require("cors");
+
+const authRoutes = require("./routes/auth.routes");
+const foodRoutes = require("./routes/food.routes");
+const foodPartnerRoutes = require("./routes/food-partner.routes");
 
 const app = express();
 
-// Allowed origins for CORS (add other deployment domains here)
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://zomato-reel-delta.vercel.app',
-  'https://reel-zom-project.vercel.app'
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://zomato-reel-delta.vercel.app",
+  "https://reel-zom-project.vercel.app",
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// preflight
+app.options("*", cors());
 
 app.use(cookieParser());
 app.use(express.json());
 
-
 app.get("/", (req, res) => {
-    res.send("Welcome to the Food Delivery App API");
+  res.send("Welcome to the Food Delivery App API");
 });
 
 app.use("/api/auth", authRoutes);
