@@ -12,11 +12,22 @@ async function createFoodItem(req, res) {
     // uuid() + ".mp4" + originalExt
   ); //video data
 
+  // priceCents is optional; defaults to 0
+  let priceCents = 0;
+  if (req.body.priceCents !== undefined && req.body.priceCents !== null && req.body.priceCents !== "") {
+    const parsed = Number(req.body.priceCents);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return res.status(400).json({ message: "Invalid priceCents" });
+    }
+    priceCents = Math.round(parsed);
+  }
+
   const foodItem = await foodModel.create({
     name: req.body.name,
     description: req.body.description,
     video: fileUploadResult.url,
     foodPartner: req.foodPartner._id,
+    priceCents,
   });
 
   res.status(201).json({

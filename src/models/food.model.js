@@ -14,6 +14,12 @@ const foodSchema = new mongoose.Schema({
     description: {
         type: String,
     },
+    // Store price as integer cents to avoid floating point issues (e.g. $9.99 => 999)
+    priceCents: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
     foodPartner:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'FoodPartner',
